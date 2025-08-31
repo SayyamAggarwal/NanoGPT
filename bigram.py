@@ -2,13 +2,14 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as f
 
-batch_size = 32
-block_size = 8
+batch_size = 64
+block_size = 256
 max_iters = 5000
 eval_interval = 500
-learning_rate = 1e-3
+learning_rate = 3e-4
 device='cuda' if torch.cuda.is_available() else 'cpu'
 eval_iters = 200
+dropout = 0.2
 
 torch.manual_seed(1337)
 
@@ -17,7 +18,7 @@ with open('input.txt','r',encoding='utf-8') as file:
 
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
-n_embd = 32
+n_embd = 384
 # encoding part 
 enc = {ch:i for i,ch in enumerate(chars)}
 dec = {i:ch for i,ch in enumerate(chars)}
@@ -72,7 +73,7 @@ class Head(nn.Module):
     self.query = nn.Linear(n_embd,head_size,bias = False)
     self.value = nn.Linear(n_embd,head_size,bias = False)
     self.register_buffer('tril',torch.tril(torch.ones(block_size,block_size)))
-
+    self.dropout = nn.Dropout(dropout)
   def forward(self,x):
     B,T,C = x.shape
     k = self.key(x)# B,T,C
@@ -82,6 +83,7 @@ class Head(nn.Module):
     wei = wei.masked_fill(self.tril[:T,:T] == 0,float("-inf"))
     wei = wei / (k.shape[-1]**0.5)
     wei = f.softmax(wei,dim= -1)
+    wei = self.dropout(wei)
     out = wei @ v # B,T,T* B,T,C = B,T,C
 
     return out
@@ -92,16 +94,22 @@ class MultiHeadAttention(nn.Module):
   def __init__(self,num_heads,head_size):
     super().__init__()
     self.heads = nn.ModuleList([Head(head_size) for num in range(num_heads)])
-  
+    self.projection = nn.Linear(n_embd,n_embd) # added for skip connections
+    self.dropout = nn.Dropout(dropout)
   def forward(self,x):
-    return  torch.cat([h(x) for h in self.heads],dim=-1)
+    out =  torch.cat([h(x) for h in self.heads],dim=-1)
+    out = self.projection(out)
+    out =self.dropout(out)
+    return out
 
 class FeedForward(nn.Module):
   def __init__(self,n_embd):
     super().__init__()
     self.layers = nn.Sequential(
-      nn.Linear(n_embd,n_embd),
-      nn.ReLU()
+      nn.Linear(n_embd,4 * n_embd),#4* because it is from paper(4*512 = 2048)
+      nn.ReLU(),
+      nn.Linear(4 * n_embd,n_embd),#added for skip connenctions
+      nn.Dropout(dropout)
     )
 
   def forward(self,x):
@@ -109,6 +117,21 @@ class FeedForward(nn.Module):
     return out
 
 
+class Block(nn.Module):
+  def __init__(self,n_embd,n_heads):
+    super().__init__()
+    head_size = n_embd // n_heads
+    self.multihead = MultiHeadAttention(n_heads,head_size)
+    self.ffnn = FeedForward(n_embd)
+    self.Norm1 = nn.LayerNorm(n_embd)
+    self.Norm2 = nn.LayerNorm(n_embd)
+
+
+
+  def forward(self,x):
+    x = x + self.multihead(self.Norm1(x))
+    x = x + self.ffnn(self.Norm2(x))# skip connections or residual connections (x+=layeroutput)
+    return x
 
 # bigram model 
 class BigramLanguageModel(nn.Module):
@@ -119,6 +142,15 @@ class BigramLanguageModel(nn.Module):
     self.multi_heads = MultiHeadAttention(4,n_embd//4) #4 heads for 8_dim self_attention
     self.ffnn = FeedForward(n_embd)
     self.position_embedding_table = nn.Embedding(block_size,n_embd)
+    self.blocks = nn.Sequential(
+      Block(n_embd,n_heads=6),
+      Block(n_embd,n_heads=6),
+      Block(n_embd,n_heads=6),
+      Block(n_embd,n_heads=6),
+      Block(n_embd,n_heads=6),
+      Block(n_embd,n_heads=6),
+      nn.LayerNorm(n_embd)
+    )
 
   def forward(self,idx,targets = None):
     B,T = idx.shape
@@ -126,8 +158,10 @@ class BigramLanguageModel(nn.Module):
     tok_emd = self.token_embedding_table(idx)#(B,T,C)
     pos_emd = self.position_embedding_table(torch.arange(T,device = device))#T,C
     x = pos_emd + tok_emd
-    x = self.multi_heads(x)
-    x = self.ffnn(x)
+    # x = self.multi_heads(x)
+    # x = self.ffnn(x)
+    x = self.blocks(x)
+
     logits  = self.lm_head(x) # (B,T,vocab_size)
     if targets is None: # Check if targets is None
       loss = None
@@ -170,7 +204,7 @@ for iter in range(max_iters):
 
 
 context = torch.zeros((1,1),dtype = torch.long,device = device)
-print(decode(m.generate(context,max_word_tokens=100)[0].tolist()))
+print(decode(m.generate(context,max_word_tokens=2000)[0].tolist()))
 
 
 
