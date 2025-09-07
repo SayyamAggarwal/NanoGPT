@@ -1,75 +1,47 @@
-BUCKINGHAM:
-Good as brother, think you, mercy; lady a Juliet.
+# TinyGPT Shakespeare Text Generation 🎭  
 
-KING RIC RICHARD III:
-A harford, Pembroke, and Harry, no morthless.
-Than a poisone upon your sight,
-The name of her accompany sleep: I hear
-In tedious wordshipw: come to-day's build your office,
-You findering should, in this my soldier fleece,
-It prot it down, his is ear,
-Being and put orite men, that answer that love
-I'll no, live with apprehends; 'tis helm
-As come to put him a ballad of England--
-You his pain fart royal maintain's to pleasing.
+This is my learning project where I trained **TinyGPT** on the **Shakespeare dataset** using **PyTorch**.  
+My goal was to understand how transformers work in practice and explore how small language models can be trained from scratch.  
 
-DUKE VINCENTIO:
-O good complexion bring him,
-I'll not call the city towar. Can nop ; I pardolace go
-And lay upon thy hurrible of life have said and
-He heard the twalk'd is lands.
+---
 
-DUCHESS OF YOF, this dolequal maids that to make
-The gracious.
+## 🌟 Project Motivation  
 
-BRUTUS:
-Faith, you good made on more.
+I have been curious about how text generation models like GPT actually work under the hood. Instead of just using pre-trained models, I wanted to try training one myself on a classical dataset — Shakespeare’s works.  
 
-JOHN OF GAUNT:
-Yea, hearbear me how a smock way.
+This project is not about state-of-the-art results but about **learning, experimenting, and building intuition** about deep learning and NLP.  
 
-Second Huntsman:
-I have you want to be gone,
-And you put you make a brial pick'd by Crate
-And that no more away 'signess.
+---
 
-BRUTUS:
-O noble name will not
-Be need fit withour.
+## ⚙️ Tech Stack  
 
-CORIOLANUS:
-Consible may to the request another?
-But look their lamentations, to the usurped seation;
-Nor now, late Some a thousand woman afford.
+- **Framework**: PyTorch 🐍  
+- **Model**: TinyGPT (a minimal GPT implementation)  
+- **Dataset**: Shakespeare dataset (`input.txt`)  
+- **Task**: Text generation + experimenting with chatbot-like interactions(can be done if finetuned in future with Q/A prompts) 
 
-MENENIUS:
-Hold you rage? when he
-That should better his ellbows, he cannot fought.
+---
 
-BRUTUS:
-Imbanish'd awhile.
+## 📦 Installation  
 
-SICINIUS:
-I think you.
-But come it with my liege importune and
-In some morrow sound most malicity, I know comelt. Farewell,
-What draws nature perform'd how my crown? Camillo?
+Clone the repository:  
 
-Third Messenger:
-Ah, my mother all the lord by Saint,
-It, forth the matter. Nimmaster comes from the coffer
-In off our business the king
-And swar the just and was a man: for me with one
-Becomes, the greatern of ne'er amise:
-Claim why, he minister
-All gaoler reprieved, and popoul to you!
-Lont to be, farewell.
+```bash
+git clone https://github.com/your-username/nanogpt-shakespeare.git
+cd trainer.py
+pip install -r requirements.txt
+python trainer.py
 
-Third Citizen:
-How nobly the labour with coffours come alment
-to hold hate about Danural not now, I am now worth.
+'''
 
-Son:
-Apother, thou hast a name of one that's to colours
-me; we do remempt as with unworth by read with nighting blus
+
+It will:
+
+Load the Shakespeare dataset.
+
+Train a small GPT model.
+
+Print out generated text after training.
+
+
 
