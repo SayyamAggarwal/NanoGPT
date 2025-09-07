@@ -18,7 +18,7 @@ This project is not about state-of-the-art results but about **learning, experim
 - **Framework**: PyTorch 🐍  
 - **Model**: TinyGPT (a minimal GPT implementation)  
 - **Dataset**: Shakespeare dataset (`input.txt`)  
-- **Task**: Text generation + experimenting with chatbot-like interactions(can be done if finetuned in future with Q/A prompts) 
+- **Task**: Text generation + experimenting with chatbot-like interactions(can be done if finetuned in future with Q/A prompt post- training) 
 
 ---
 
